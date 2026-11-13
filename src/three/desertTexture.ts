@@ -124,15 +124,15 @@ export function createDesertTexture(width = 1520, height = 800): CanvasTexture {
 }
 
 /** Soft radial glow used as a halo behind the screen. */
-export function createGlowTexture(size = 256): CanvasTexture {
+export function createGlowTexture(size = 256, rgb = '255, 170, 120'): CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')!
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  gradient.addColorStop(0, 'rgba(255, 190, 130, 0.5)')
-  gradient.addColorStop(0.5, 'rgba(255, 160, 110, 0.14)')
-  gradient.addColorStop(0.85, 'rgba(255, 140, 90, 0)')
+  gradient.addColorStop(0, `rgba(${rgb}, 0.5)`)
+  gradient.addColorStop(0.5, `rgba(${rgb}, 0.14)`)
+  gradient.addColorStop(0.85, `rgba(${rgb}, 0)`)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
   const texture = new CanvasTexture(canvas)

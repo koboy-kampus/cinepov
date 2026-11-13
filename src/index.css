@@ -19,3 +19,22 @@
     @apply bg-bg font-sans text-white antialiased;
   }
 }
+
+/* Map ⇄ 3D stage: the loading pill fades in after a short delay, its bar slides. */
+@keyframes stage-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes stage-loading {
+  from {
+    left: -33%;
+  }
+  to {
+    left: 100%;
+  }
+}

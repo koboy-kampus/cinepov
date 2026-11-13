@@ -42,6 +42,7 @@ export function BottomBar() {
               </div>
               <button
                 type="button"
+                data-continue
                 onClick={() => setView('pov')}
                 // Start downloading the 3D view as soon as the user heads for Continue.
                 onPointerEnter={loadTheaterScene}

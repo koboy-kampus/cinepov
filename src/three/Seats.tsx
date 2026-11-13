@@ -10,7 +10,6 @@ import { createReclinerSeat, createStandardSeat } from './seatModels'
 const COLOURS = {
   standard: new Color('#8b1e2b'),
   recliner: new Color('#b23a48'),
-  selected: new Color('#6ee7a8'),
 }
 const TAKEN_TINT = new Color('#141416')
 
@@ -28,7 +27,6 @@ function SeatGroup({
   useEffect(() => () => geometry.dispose(), [geometry])
 
   const showtimeId = useBooking((s) => s.showtimeId)
-  const selectedSeatId = useBooking((s) => s.selectedSeatId)
 
   // Positions never change: set them once.
   useLayoutEffect(() => {
@@ -43,17 +41,18 @@ function SeatGroup({
     ref.current!.computeBoundingSphere()
   }, [seats])
 
-  // Colours follow the showtime (taken seats) and the selection.
+  // Colours follow the showtime (taken seats).
   useLayoutEffect(() => {
     const colour = new Color()
     seats.forEach((seat, i) => {
-      if (seat.id === selectedSeatId) colour.copy(COLOURS.selected)
-      else if (isSeatTaken(showtimeId, seat.id)) colour.copy(COLOURS[type]).lerp(TAKEN_TINT, 0.75)
+      // The selected seat keeps its normal colour here: SelectedSeat draws a
+      // glowing mint copy on top that fades away as the camera sits down.
+      if (isSeatTaken(showtimeId, seat.id)) colour.copy(COLOURS[type]).lerp(TAKEN_TINT, 0.75)
       else colour.copy(COLOURS[type])
       ref.current!.setColorAt(i, colour)
     })
     ref.current!.instanceColor!.needsUpdate = true
-  }, [seats, type, showtimeId, selectedSeatId])
+  }, [seats, type, showtimeId])
 
   return (
     <instancedMesh ref={ref} args={[geometry, undefined, seats.length]}>
