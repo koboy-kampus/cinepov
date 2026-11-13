@@ -88,7 +88,14 @@ export function SeatMap() {
     <div className="px-4">
       <ScreenArc />
 
-      <div ref={mapRef} role="group" aria-label="Seat map" className="mt-5 flex flex-col gap-2.5">
+      <div
+        ref={mapRef}
+        role="group"
+        aria-label="Seat map"
+        className="mt-4 flex flex-col"
+        // Row spacing grows a little on taller phones and shrinks on short ones.
+        style={{ rowGap: 'clamp(6px, calc(2dvh - 4px), 16px)' }}
+      >
         {SEATS_BY_ROW.map((rowSeats, rowIndex) => {
           const row = ROWS[rowIndex]
           const recliner = rowSeats[0].type === 'recliner'
@@ -103,7 +110,7 @@ export function SeatMap() {
               }`}
               style={{ gridTemplateColumns: GRID_COLUMNS }}
             >
-              <RowLabel row={row} column={1} />
+              <RowLabel row={row} side="left" />
               {rowSeats.map((seat) => {
                 const taken = isSeatTaken(showtimeId, seat.id)
                 const selected = seat.id === selectedSeatId
@@ -130,7 +137,7 @@ export function SeatMap() {
                   />
                 )
               })}
-              <RowLabel row={row} column={-1} />
+              <RowLabel row={row} side="right" />
             </div>
           )
         })}
@@ -140,12 +147,18 @@ export function SeatMap() {
 }
 
 /** Row letter shown on both sides of a row (decorative: seat buttons already say the row). */
-function RowLabel({ row, column }: { row: string; column: number }) {
+function RowLabel({ row, side }: { row: string; side: 'left' | 'right' }) {
   return (
     <span
       aria-hidden
-      className="text-center text-[10px] font-medium text-white/50"
-      style={{ gridColumn: column, transform: `translateY(${ROW_CURVE_PX}px)` }}
+      // Solid grey + own GPU layer (will-change) = greyscale text smoothing, so thin
+      // letters like "I" don't get coloured ClearType fringes on Windows.
+      className="text-center text-[10px] font-semibold text-[#8a8a90] will-change-transform"
+      style={{
+        // First column, or the last explicit column ("-2 / -1"), never an implicit extra one.
+        gridColumn: side === 'left' ? '1' : '-2 / -1',
+        transform: `translateY(${ROW_CURVE_PX}px)`,
+      }}
     >
       {row}
     </span>

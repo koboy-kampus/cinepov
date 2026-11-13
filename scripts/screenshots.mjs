@@ -15,6 +15,7 @@ const OUT_DIR = '.screenshots'
 
 const VIEWPORTS = [
   { name: 'phone', width: 390, height: 844 },
+  { name: 'phone-short', width: 375, height: 667 },
   { name: 'desktop', width: 1440, height: 900 },
 ]
 

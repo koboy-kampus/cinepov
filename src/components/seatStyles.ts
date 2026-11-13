@@ -11,8 +11,8 @@ export type SeatState = 'available' | 'taken' | 'selected'
 export function seatClasses(type: SeatType, state: SeatState): string {
   const shape =
     type === 'recliner'
-      ? 'aspect-[1/1.2] rounded-[40%_40%_30%_30%]'
-      : 'aspect-square rounded-[35%_35%_20%_20%]'
+      ? 'aspect-[1/1.35] rounded-[40%_40%_30%_30%]'
+      : 'aspect-[1/1.15] rounded-[35%_35%_20%_20%]'
 
   const colour =
     state === 'selected'
