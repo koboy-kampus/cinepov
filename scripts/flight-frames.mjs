@@ -4,7 +4,7 @@
  * the (software-rendered, headless) browser draws.
  *
  * Needs the dev server (npm run dev). Usage:
- *   node scripts/flight-frames.mjs [seat] [frames]
+ *   node scripts/flight-frames.mjs [seat] [frames] [width]x[height]
  */
 import { mkdir } from 'node:fs/promises'
 import { chromium } from 'playwright'
@@ -12,13 +12,14 @@ import { chromium } from 'playwright'
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173'
 const SEAT = process.argv[2] ?? 'F8'
 const FRAMES = Number(process.argv[3] ?? 30)
-const OUT_DIR = `.screenshots/flight-${SEAT}`
+const [WIDTH, HEIGHT] = (process.argv[4] ?? '390x844').split('x').map(Number)
+const OUT_DIR = `.screenshots/flight-${SEAT}-${WIDTH}x${HEIGHT}`
 
 await mkdir(OUT_DIR, { recursive: true })
 const browser = await chromium.launch({
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 })
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } })
 page.on('pageerror', (e) => console.log('PAGE ERROR', e.message))
 page.on('console', (m) => m.type() === 'error' && console.log('CONSOLE', m.text()))
 await page.goto(BASE_URL, { waitUntil: 'networkidle' })

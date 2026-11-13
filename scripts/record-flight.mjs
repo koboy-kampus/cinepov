@@ -4,14 +4,15 @@
  * software, so the frame rate is low; judge smoothness on a real device.
  *
  * Needs the dev server (npm run dev). Usage:
- *   node scripts/record-flight.mjs [seat]
- * Saves .screenshots/flight-<seat>.webm
+ *   node scripts/record-flight.mjs [seat] [reduce]
+ * Saves .screenshots/flight-<seat>.webm (or -reduced.webm with prefers-reduced-motion)
  */
 import { mkdir, rename } from 'node:fs/promises'
 import { chromium } from 'playwright'
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173'
 const SEAT = process.argv[2] ?? 'F8'
+const REDUCED = process.argv[3] === 'reduce'
 const OUT_DIR = '.screenshots'
 const size = { width: 390, height: 844 }
 
@@ -21,6 +22,7 @@ const browser = await chromium.launch({
 })
 const context = await browser.newContext({
   viewport: size,
+  reducedMotion: REDUCED ? 'reduce' : 'no-preference',
   recordVideo: { dir: `${OUT_DIR}/video-tmp`, size },
 })
 const page = await context.newPage()
@@ -36,6 +38,6 @@ await page.locator('[data-continue]').waitFor({ state: 'visible' })
 await page.waitForTimeout(2500)
 const video = page.video()
 await context.close()
-await rename(await video.path(), `${OUT_DIR}/flight-${SEAT}.webm`)
+await rename(await video.path(), `${OUT_DIR}/flight-${SEAT}${REDUCED ? '-reduced' : ''}.webm`)
 await browser.close()
-console.log(`saved ${OUT_DIR}/flight-${SEAT}.webm`)
+console.log(`saved ${OUT_DIR}/flight-${SEAT}${REDUCED ? '-reduced' : ''}.webm`)

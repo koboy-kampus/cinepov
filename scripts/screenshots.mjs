@@ -34,8 +34,9 @@ const SCENES = [
     name: `pov-${seat}`,
     query: `?seat=${seat}`,
     steps: async (page) => {
-      await page.waitForSelector('canvas')
-      await page.waitForTimeout(1500) // let the scene render a few frames
+      // The pill appears when the camera has landed (after the flight).
+      await page.getByText(`View from ${seat}`).waitFor({ timeout: 30000 })
+      await page.waitForTimeout(800) // let the sheet finish sliding in
     },
   })),
 ]
