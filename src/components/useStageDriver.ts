@@ -49,11 +49,7 @@ export function useStageDriver() {
     const controls = animate(stageProgress, target, {
       duration: transitionDuration(stageProgress.get(), target, reduced),
       ease: 'linear', // the easing lives in lib/transition, per part of the timeline
-      onComplete: () => {
-        useStage.setState({ arrived: target === 1, settled: true })
-        // Back on the map: put keyboard focus on Continue, where the user left.
-        if (target === 0) document.querySelector<HTMLElement>('[data-continue]')?.focus()
-      },
+      onComplete: () => useStage.setState({ arrived: target === 1, settled: true }),
     })
     return () => controls.stop()
   }, [view, ready])

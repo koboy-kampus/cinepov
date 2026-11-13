@@ -1,6 +1,7 @@
-import { motion, MotionConfig, useTransform } from 'framer-motion'
-import { useEffect } from 'react'
+import { AnimatePresence, motion, MotionConfig, useTransform } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 import { BottomBar } from './components/BottomBar'
+import { ConfirmView } from './components/ConfirmView'
 import { Header } from './components/Header'
 import { Legend } from './components/Legend'
 import { PhoneFrame } from './components/PhoneFrame'
@@ -31,11 +32,21 @@ function App() {
   // Only usable when it's fully back: no blind taps while it's still fading in.
   const mapActive = view === 'map' && settled
 
+  // Back on the map after the 3D view: put keyboard focus on Continue, where
+  // the user left off (after React has removed `inert`, or focus would fail).
+  const wasActive = useRef(mapActive)
+  useEffect(() => {
+    if (mapActive && !wasActive.current) {
+      document.querySelector<HTMLElement>('[data-continue]')?.focus()
+    }
+    wasActive.current = mapActive
+  }, [mapActive])
+
   return (
     // reducedMotion="user": Framer Motion respects the OS "reduce motion" setting.
     <MotionConfig reducedMotion="user">
       <PhoneFrame>
-        {/* Layers, bottom to top: 3D stage, seat map, POV controls, loading pill. */}
+        {/* Layers, bottom to top: 3D stage, seat map, POV pill + sheet, loading pill, confirmation. */}
         <Stage />
         <motion.div
           inert={!mapActive}
@@ -56,6 +67,7 @@ function App() {
         </motion.div>
         <PovOverlay />
         {view === 'pov' && !ready && <StageLoading />}
+        <AnimatePresence>{view === 'confirm' && <ConfirmView />}</AnimatePresence>
       </PhoneFrame>
     </MotionConfig>
   )
