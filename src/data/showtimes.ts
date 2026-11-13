@@ -5,7 +5,8 @@ export type Showtime = {
   id: string
   /** Local start time, "HH:MM". */
   time: string
-  format: 'Standard' | 'IMAX'
+  /** Every showtime is in the same studio with the same screen; ATMOS only means Dolby Atmos sound. */
+  format: 'Standard' | 'ATMOS'
   /** IDs of seats that are already booked, e.g. ["A3", "F9", …]. */
   takenSeatIds: readonly string[]
 }
@@ -23,7 +24,7 @@ export function pickTakenSeats(seed: number, fraction: number): string[] {
 
 export const SHOWTIMES: readonly Showtime[] = [
   { id: '1730', time: '17:30', format: 'Standard', takenSeatIds: pickTakenSeats(1730, 0.26) },
-  { id: '1945', time: '19:45', format: 'IMAX', takenSeatIds: pickTakenSeats(1945, 0.34) },
+  { id: '1945', time: '19:45', format: 'ATMOS', takenSeatIds: pickTakenSeats(1945, 0.34) },
   { id: '2215', time: '22:15', format: 'Standard', takenSeatIds: pickTakenSeats(2215, 0.29) },
 ]
 

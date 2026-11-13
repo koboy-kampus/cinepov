@@ -1,5 +1,5 @@
 /**
- * Hall 3 at the Meridian: physical layout and seat list.
+ * The studio's physical layout and seat list (names live in venue.ts).
  *
  * Every number that shapes the theatre lives in `HALL`, so tuning the hall means
  * editing this one object. All lengths are in metres.

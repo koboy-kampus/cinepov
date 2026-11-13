@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getSeat, SEATS } from './hall'
 import { pickTakenSeats, SHOWTIMES } from './showtimes'
+import { VENUE, VENUE_LABEL } from './venue'
 
 describe('hall seats', () => {
   it('has 9 rows × 14 seats = 126 seats', () => {
@@ -26,10 +27,10 @@ describe('hall seats', () => {
 })
 
 describe('showtimes', () => {
-  it('has 17:30, 19:45 IMAX and 22:15', () => {
+  it('has 17:30, 19:45 ATMOS and 22:15', () => {
     expect(SHOWTIMES.map((s) => `${s.time} ${s.format}`)).toEqual([
       '17:30 Standard',
-      '19:45 IMAX',
+      '19:45 ATMOS',
       '22:15 Standard',
     ])
   })
@@ -58,5 +59,12 @@ describe('showtimes', () => {
         "D4",
       ]
     `)
+  })
+})
+
+describe('venue', () => {
+  it('is Layar · Studio 3', () => {
+    expect(VENUE).toEqual({ cinema: 'Layar', studio: 'Studio 3' })
+    expect(VENUE_LABEL).toBe('Layar · Studio 3')
   })
 })

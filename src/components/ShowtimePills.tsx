@@ -22,11 +22,11 @@ export function ShowtimePills() {
             }`}
           >
             {show.time}
-            {show.format === 'IMAX' && (
+            {show.format !== 'Standard' && (
               <span
                 className={`ml-1.5 text-xs font-semibold ${active ? 'text-bg/70' : 'text-white/60'}`}
               >
-                IMAX
+                {show.format}
               </span>
             )}
           </button>
