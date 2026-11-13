@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/* CinePOV theme tokens -> usable as bg-bg, text-mint, bg-seat, font-sans, etc. */
+@theme {
+  --color-bg: #0a0a0b;
+  --color-mint: #6ee7a8;
+  --color-seat: #8b1e2b;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg font-sans text-white antialiased;
+  }
+}
