@@ -25,6 +25,11 @@ export type BookingState = {
   /** Change screen. 'pov' and 'confirm' need a selected seat, otherwise ignored. */
   setView: (view: View) => void
   setCurrency: (currency: Currency) => void
+  /**
+   * Deep link: "?seat=F8" selects F8 and opens its 3D view. Ignored if the seat
+   * doesn't exist or is taken in the current showtime.
+   */
+  openSeatFromQuery: (search: string) => void
 }
 
 export const initialBookingState = {
@@ -57,4 +62,11 @@ export const useBooking = create<BookingState>()((set, get) => ({
   },
 
   setCurrency: (currency) => set({ currency }),
+
+  openSeatFromQuery: (search) => {
+    const id = new URLSearchParams(search).get('seat')?.trim().toUpperCase()
+    if (!id) return
+    get().selectSeat(id) // does nothing for unknown or taken seats
+    if (get().selectedSeatId === id) set({ view: 'pov' })
+  },
 }))

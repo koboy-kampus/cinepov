@@ -61,6 +61,18 @@ describe('useBooking', () => {
     expect(store().view).toBe('map')
   })
 
+  it('opens a seat from the URL (?seat=F8), case-insensitive', () => {
+    store().openSeatFromQuery('?seat=f8')
+    expect(store()).toMatchObject({ selectedSeatId: 'F8', view: 'pov' })
+  })
+
+  it('ignores ?seat= for taken, unknown or missing seats', () => {
+    for (const search of ['?seat=A3', '?seat=Z99', '?seat=', '']) {
+      store().openSeatFromQuery(search)
+      expect(store()).toMatchObject({ selectedSeatId: null, view: 'map' })
+    }
+  })
+
   it('switches currency', () => {
     store().setCurrency('IDR')
     expect(store().currency).toBe('IDR')
