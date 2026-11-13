@@ -3,7 +3,7 @@ import { BottomBar } from './components/BottomBar'
 import { Header } from './components/Header'
 import { Legend } from './components/Legend'
 import { PhoneFrame } from './components/PhoneFrame'
-import { PovPlaceholder } from './components/PovPlaceholder'
+import { PovScreen } from './components/PovScreen'
 import { SeatMap } from './components/SeatMap'
 import { ShowtimePills } from './components/ShowtimePills'
 import { useBooking } from './store/useBooking'
@@ -30,7 +30,7 @@ function App() {
             <BottomBar />
           </>
         ) : (
-          <PovPlaceholder />
+          <PovScreen />
         )}
       </PhoneFrame>
     </MotionConfig>
