@@ -26,3 +26,18 @@ export const SHOWTIMES: readonly Showtime[] = [
   { id: '1945', time: '19:45', format: 'IMAX', takenSeatIds: pickTakenSeats(1945, 0.34) },
   { id: '2215', time: '22:15', format: 'Standard', takenSeatIds: pickTakenSeats(2215, 0.29) },
 ]
+
+export const DEFAULT_SHOWTIME_ID = '1945'
+
+// Fast lookups: showtime by ID, and the taken seats of each showtime as a Set.
+const SHOWTIMES_BY_ID = new Map(SHOWTIMES.map((show) => [show.id, show]))
+const TAKEN_BY_SHOWTIME = new Map(SHOWTIMES.map((show) => [show.id, new Set(show.takenSeatIds)]))
+
+export function getShowtime(id: string): Showtime | undefined {
+  return SHOWTIMES_BY_ID.get(id)
+}
+
+/** True if the seat is already booked for that showtime. */
+export function isSeatTaken(showtimeId: string, seatId: string): boolean {
+  return TAKEN_BY_SHOWTIME.get(showtimeId)?.has(seatId) ?? false
+}
