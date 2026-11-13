@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import { useBooking } from '../store/useBooking'
+import { loadTheaterScene } from '../three/loadScene'
 
 // Lazy: Three.js + React Three Fiber are only downloaded when this screen opens.
-const TheaterScene = lazy(() => import('../three/TheaterScene'))
+const TheaterScene = lazy(loadTheaterScene)
 
 /** The point-of-view screen: the 3D theater seen from the selected seat. */
 export function PovScreen() {

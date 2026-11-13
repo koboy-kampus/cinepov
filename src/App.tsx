@@ -1,4 +1,5 @@
 import { MotionConfig } from 'framer-motion'
+import { useEffect } from 'react'
 import { BottomBar } from './components/BottomBar'
 import { Header } from './components/Header'
 import { Legend } from './components/Legend'
@@ -7,9 +8,16 @@ import { PovScreen } from './components/PovScreen'
 import { SeatMap } from './components/SeatMap'
 import { ShowtimePills } from './components/ShowtimePills'
 import { useBooking } from './store/useBooking'
+import { loadTheaterScene } from './three/loadScene'
 
 function App() {
   const view = useBooking((s) => s.view)
+  const hasSeat = useBooking((s) => s.selectedSeatId !== null)
+
+  // Preload the 3D chunk as soon as a seat is selected.
+  useEffect(() => {
+    if (hasSeat) loadTheaterScene()
+  }, [hasSeat])
 
   return (
     // reducedMotion="user": Framer Motion respects the OS "reduce motion" setting.

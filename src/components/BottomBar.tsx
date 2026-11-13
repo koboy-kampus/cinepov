@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { getSeat } from '../data/hall'
 import { formatPrice } from '../lib/currency'
 import { useBooking } from '../store/useBooking'
+import { loadTheaterScene } from '../three/loadScene'
 
 const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
@@ -42,6 +43,9 @@ export function BottomBar() {
               <button
                 type="button"
                 onClick={() => setView('pov')}
+                // Start downloading the 3D view as soon as the user heads for Continue.
+                onPointerEnter={loadTheaterScene}
+                onFocus={loadTheaterScene}
                 className="rounded-full bg-mint px-6 py-3 text-sm font-semibold text-bg transition-transform hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-95"
               >
                 Continue
