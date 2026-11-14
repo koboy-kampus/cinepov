@@ -1,6 +1,7 @@
 import { useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { MathUtils } from 'three'
+import { deviceLook } from './deviceLook'
 
 /** How far you can look around from the screen centre, degrees. */
 export const MAX_YAW = 25
@@ -24,7 +25,8 @@ type Look = {
   startY: number
   gyroYaw: number
   gyroPitch: number
-  base: { alpha: number; beta: number } | null
+  /** Where the phone pointed when the view was centred (yaw/pitch, degrees). */
+  base: { yaw: number; pitch: number } | null
 }
 
 const wrap180 = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180
@@ -101,14 +103,16 @@ export function useLookAround(enabled: boolean) {
     }
     const onOrientation = (event: DeviceOrientationEvent) => {
       if (event.alpha === null || event.beta === null) return
-      s.base ??= { alpha: event.alpha, beta: event.beta }
-      const dAlpha = wrap180(event.alpha - s.base.alpha)
-      const dBeta = event.beta - s.base.beta
+      // Where the phone's back points; right in portrait and both landscape directions.
+      const now = deviceLook(event.alpha, event.beta, event.gamma ?? 0)
+      s.base ??= { ...now }
+      const dYaw = wrap180(now.yaw - s.base.yaw)
+      const dPitch = now.pitch - s.base.pitch
       // Slowly adopt the current direction as "straight ahead" (eases back to centre).
-      s.base.alpha += dAlpha * GYRO_RECENTRE
-      s.base.beta += dBeta * GYRO_RECENTRE
-      s.gyroYaw = MathUtils.clamp(dAlpha, -MAX_YAW, MAX_YAW)
-      s.gyroPitch = MathUtils.clamp(dBeta, -MAX_PITCH, MAX_PITCH)
+      s.base.yaw = wrap180(s.base.yaw + dYaw * GYRO_RECENTRE)
+      s.base.pitch += dPitch * GYRO_RECENTRE
+      s.gyroYaw = MathUtils.clamp(dYaw, -MAX_YAW, MAX_YAW)
+      s.gyroPitch = MathUtils.clamp(dPitch, -MAX_PITCH, MAX_PITCH)
       invalidate()
     }
 
