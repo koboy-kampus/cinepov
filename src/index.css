@@ -10,9 +10,27 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* The app is exactly the visible viewport tall (100vh fallback for old browsers). */
+@utility h-app {
+  height: 100vh;
+  @supports (height: 100dvh) {
+    height: 100dvh;
+  }
+}
+
 @layer base {
   html {
     color-scheme: dark;
+  }
+
+  /* The page itself never scrolls: no rubber-banding, no pull-to-refresh.
+     Only inner panels scroll, and only if they really need to. */
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body {
