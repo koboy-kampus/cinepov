@@ -10,6 +10,11 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Phone held sideways (short landscape screen): side-by-side layout. Keep in
+   sync with lib/layout.ts. `frame`: big screens, where the app sits in a phone frame. */
+@custom-variant land (@media (orientation: landscape) and (max-height: 500px));
+@custom-variant frame (@media (min-width: 768px) and (min-height: 501px));
+
 /* The app is exactly the visible viewport tall (100vh fallback for old browsers). */
 @utility h-app {
   height: 100vh;

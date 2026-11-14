@@ -85,7 +85,9 @@ export function SeatMap() {
   }
 
   return (
-    <div className="px-4">
+    // Phone sideways: the map's height follows its width, so cap the width to
+    // make the whole hall fit the short screen without scrolling.
+    <div className="px-4 land:mx-auto land:w-full land:max-w-[calc((100dvh-2.5rem)*1.12)]">
       <ScreenArc />
 
       <div

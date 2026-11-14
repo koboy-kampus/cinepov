@@ -51,18 +51,21 @@ function App() {
         <motion.div
           inert={!mapActive}
           style={{ opacity: mapOpacity }}
-          className={`absolute inset-0 z-10 flex flex-col bg-bg ${mapActive ? '' : 'pointer-events-none'}`}
+          // Phone sideways: the seat map on the left, everything else in a panel on the right.
+          className={`absolute inset-0 z-10 flex flex-col bg-bg land:grid land:grid-cols-[minmax(0,1fr)_max(18.75rem,40%)] land:grid-rows-[auto_auto_minmax(0,1fr)_auto] ${mapActive ? '' : 'pointer-events-none'}`}
         >
           <Header />
           <ShowtimePills />
-          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain py-3">
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain py-3 land:col-start-1 land:row-span-full land:row-start-1 land:py-2">
             {/* my-auto centres the map in the free space, but (unlike justify-center)
                 never cuts off the top when a short screen needs to scroll. */}
             <div className="my-auto flex flex-col gap-5">
               <SeatMap />
-              <Legend />
+              <Legend className="land:hidden" />
             </div>
           </main>
+          {/* Phone sideways: the legend moves into the side panel, next to the map. */}
+          <Legend className="hidden land:col-start-2 land:row-start-3 land:flex land:justify-center" />
           <BottomBar />
         </motion.div>
         <PovOverlay />

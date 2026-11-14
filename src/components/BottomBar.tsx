@@ -17,7 +17,7 @@ export function BottomBar() {
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="mx-3 mb-3 rounded-3xl bg-white/[0.06] p-4 ring-1 ring-white/10 backdrop-blur"
+      className="mx-3 mb-3 rounded-3xl land:col-start-2 land:row-start-4 bg-white/[0.06] p-4 ring-1 ring-white/10 backdrop-blur"
     >
       {/* aria-live: screen readers announce the seat when it changes */}
       <div aria-live="polite" className="flex min-h-12 items-center justify-between gap-3">

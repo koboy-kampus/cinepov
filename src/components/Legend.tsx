@@ -8,9 +8,9 @@ const ITEMS: { label: string; type: SeatType; state: SeatState }[] = [
   { label: 'Selected', type: 'standard', state: 'selected' },
 ]
 
-export function Legend() {
+export function Legend({ className = '' }: { className?: string }) {
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className={`flex flex-col items-center gap-3 ${className}`}>
       <ul className="flex flex-wrap justify-center gap-x-5 gap-y-2 px-5 text-xs text-white/70">
         {ITEMS.map((item) => (
           <li key={item.label} className="flex items-center gap-2">
