@@ -17,6 +17,9 @@ const VIEWPORTS = [
   { name: 'phone', width: 390, height: 844 },
   { name: 'phone-short', width: 375, height: 667 },
   { name: 'desktop', width: 1440, height: 900 },
+  // Phones held sideways
+  { name: 'landscape', width: 844, height: 390 },
+  { name: 'landscape-short', width: 667, height: 375 },
 ]
 
 /** Each scene: a name, an optional URL query, and steps to get the page into that state. */
@@ -39,6 +42,16 @@ const SCENES = [
       await page.waitForTimeout(800) // let the sheet finish sliding in
     },
   })),
+  {
+    // Halfway through the map -> seat flight (needs the dev server: it drives the timeline).
+    name: 'flight-mid-F8',
+    query: '?seat=F8',
+    steps: async (page) => {
+      await page.getByText('View from F8').waitFor({ timeout: 30000 })
+      await page.evaluate(() => window.__cinepov.stageProgress.jump(0.5))
+      await page.waitForTimeout(500)
+    },
+  },
 ]
 
 await mkdir(OUT_DIR, { recursive: true })
@@ -55,6 +68,12 @@ for (const viewport of VIEWPORTS) {
   for (const scene of SCENES) {
     await page.goto(BASE_URL + (scene.query ?? ''), { waitUntil: 'networkidle' })
     await scene.steps(page)
+    // The page itself must never scroll (only inner panels may).
+    const [scrollHeight, innerHeight] = await page.evaluate(() => [
+      document.scrollingElement.scrollHeight,
+      window.innerHeight,
+    ])
+    if (scrollHeight > innerHeight) console.warn(`  page scrolls: ${scrollHeight} > ${innerHeight}`)
     const file = `${OUT_DIR}/${scene.name}-${viewport.name}.png`
     await page.screenshot({ path: file })
     console.log('saved', file)

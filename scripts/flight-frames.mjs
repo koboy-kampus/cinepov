@@ -30,13 +30,10 @@ await page.waitForSelector('canvas')
 // Let the real transition finish, then take control of the timeline.
 await page.waitForTimeout(4000)
 
-await page.evaluate(async () => {
-  const { stageProgress } = await import('/src/store/useStage.ts')
-  window.__stage = stageProgress
-})
+// window.__cinepov is exposed by src/main.tsx in dev builds.
 for (let i = 0; i <= FRAMES; i++) {
   const T = i / FRAMES
-  await page.evaluate((t) => window.__stage.jump(t), T)
+  await page.evaluate((t) => window.__cinepov.stageProgress.jump(t), T)
   await page.waitForTimeout(250)
   await page.screenshot({ path: `${OUT_DIR}/${String(i).padStart(3, '0')}.png` })
 }
