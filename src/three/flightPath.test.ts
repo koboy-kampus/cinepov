@@ -66,14 +66,43 @@ describe('POV pose', () => {
     const camera = new PerspectiveCamera(pose.fov, 390 / 844, 0.05, 200)
     camera.position.copy(pose.position)
     camera.quaternion.copy(pose.quaternion)
-    camera.setViewOffset(390, 844, 0, pose.shift * 844, 390, 844)
+    camera.setViewOffset(390, 844, pose.shiftX * 390, pose.shiftY * 844, 390, 844)
     camera.updateMatrixWorld()
     const ndc = new Vector3(SCREEN_CENTRE.x, SCREEN_CENTRE.y, SCREEN_CENTRE.z).project(camera)
     expect(((1 - ndc.y) / 2) * 844).toBeCloseTo(287, -1)
   })
 
   it('never shifts when nothing covers the view', () => {
-    expect(povPose(F8, { width: 390, height: 844, top: 0, bottom: 0 }).shift).toBe(0)
+    const pose = povPose(F8, { width: 390, height: 844, top: 0, bottom: 0 })
+    expect([pose.shiftX, pose.shiftY]).toEqual([0, 0])
+  })
+
+  it('phone sideways: centres the screen in the area left of the side panel', () => {
+    // 844 × 390 with a 338 px panel on the right: free area is 0 … 506 px wide.
+    const framing = { width: 844, height: 390, top: 64, bottom: 0, right: 338 }
+    const pose = povPose(F8, framing)
+    const camera = new PerspectiveCamera(pose.fov, 844 / 390, 0.05, 200)
+    camera.position.copy(pose.position)
+    camera.quaternion.copy(pose.quaternion)
+    camera.setViewOffset(844, 390, pose.shiftX * 844, pose.shiftY * 390, 844, 390)
+    camera.updateMatrixWorld()
+    const screenAt = (x: number) => {
+      const ndc = new Vector3(x, SCREEN_CENTRE.y, SCREEN_CENTRE.z).project(camera)
+      return { x: ((ndc.x + 1) / 2) * 844, y: ((1 - ndc.y) / 2) * 390 }
+    }
+    const centre = screenAt(SCREEN_CENTRE.x)
+    expect(centre.x).toBeCloseTo(253, -1)
+    expect(centre.y).toBeCloseTo(195, -1)
+    // Same 70° horizontal view as portrait, across the free area (506 px):
+    // the free area's edges are 35° either side of the view direction.
+    const edge = new Vector3(-1, 0, 0).applyQuaternion(pose.quaternion)
+    const forward = new Vector3(0, 0, -1).applyQuaternion(pose.quaternion)
+    const left = pose.position
+      .clone()
+      .add(forward.multiplyScalar(5))
+      .add(edge.multiplyScalar(5 * Math.tan((35 * Math.PI) / 180)))
+    const ndc = left.project(camera)
+    expect(((ndc.x + 1) / 2) * 844).toBeCloseTo(0, -1)
   })
 })
 
@@ -88,7 +117,8 @@ describe('flight', () => {
     expect(end.position.distanceTo(to.position)).toBeCloseTo(0)
     expect(end.quaternion.angleTo(to.quaternion)).toBeCloseTo(0)
     expect(end.fov).toBeCloseTo(to.fov)
-    expect(end.shift).toBeCloseTo(to.shift)
+    expect(end.shiftX).toBeCloseTo(to.shiftX)
+    expect(end.shiftY).toBeCloseTo(to.shiftY)
   })
 
   it('moves smoothly: no jumps between frames and a soft landing', () => {

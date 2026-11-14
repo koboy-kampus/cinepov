@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { Seat } from '../data/hall'
 import { formatPrice } from '../lib/currency'
+import { useCompactLandscape } from '../lib/layout'
 import { formatOffset, getSeatMetrics, type SeatTag } from '../lib/metrics'
 import { useBooking } from '../store/useBooking'
 import { useStage } from '../store/useStage'
@@ -17,9 +18,10 @@ const TAG_STYLES: Record<SeatTag, string> = {
 const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 /**
- * Bottom sheet with the seat's details. Mounted (off-screen) as soon as the
- * 3D view opens, so its height is known before the camera lands: the camera
- * frames the cinema screen in the space above it.
+ * The seat's details: a bottom sheet in portrait, a side panel on the right
+ * when the phone is sideways. Mounted (off-screen) as soon as the 3D view
+ * opens, so its size is known before the camera lands: the camera frames the
+ * cinema screen in the space it leaves free.
  */
 export function SeatSheet({ seat, visible }: { seat: Seat; visible: boolean }) {
   const showtimeId = useBooking((s) => s.showtimeId)
@@ -27,20 +29,30 @@ export function SeatSheet({ seat, visible }: { seat: Seat; visible: boolean }) {
   const setView = useBooking((s) => s.setView)
   const { distance, fov, offset, tag } = getSeatMetrics(seat)
   const price = formatPrice(seat.price, currency)
+  const landscape = useCompactLandscape()
 
   const ref = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
-  // Report the sheet's height to the 3D camera (and keep it updated).
+  // Tell the 3D camera how much of the view the sheet covers (kept updated,
+  // also when the phone is rotated).
   useLayoutEffect(() => {
     const element = ref.current
     if (!element) return
-    const report = () => useStage.setState({ sheetHeight: element.offsetHeight })
+    const report = () =>
+      useStage.setState(
+        landscape
+          ? { sheetBottom: 0, sheetRight: element.offsetWidth }
+          : { sheetBottom: element.offsetHeight, sheetRight: 0 },
+      )
     report()
     const observer = new ResizeObserver(report)
     observer.observe(element)
     return () => observer.disconnect()
-  }, [])
+  }, [landscape])
+
+  // Off-screen below (portrait) or to the right (sideways) until the camera lands.
+  const hidden = landscape ? { x: '105%', y: 0 } : { x: 0, y: '105%' }
 
   // Move focus into the sheet when the camera has landed.
   useEffect(() => {
@@ -52,15 +64,18 @@ export function SeatSheet({ seat, visible }: { seat: Seat; visible: boolean }) {
       ref={ref}
       aria-labelledby="seat-sheet-title"
       inert={!visible}
-      initial={{ y: '105%' }}
-      animate={{ y: visible ? 0 : '105%' }}
-      exit={{ y: '105%' }}
+      initial={hidden}
+      animate={visible ? { x: 0, y: 0 } : hidden}
+      exit={hidden}
       transition={{ type: 'spring', stiffness: 260, damping: 32 }}
-      className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 rounded-t-[1.75rem] bg-[#141416]/95 px-5 pt-3 pb-5 shadow-[0_-12px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/10 backdrop-blur-md"
+      // Sideways: a full-height panel on the right that scrolls inside if it must.
+      className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 rounded-t-[1.75rem] bg-[#141416]/95 px-5 pt-3 pb-5 shadow-[0_-12px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/10 backdrop-blur-md land:top-0 land:left-auto land:flex land:w-[max(18.75rem,40%)] land:flex-col land:overflow-y-auto land:overscroll-contain land:rounded-none land:rounded-l-[1.75rem] land:py-4 land:shadow-[-12px_0_40px_rgba(0,0,0,0.5)]"
     >
-      <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
+      <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20 land:hidden" />
 
-      <div className="flex items-start justify-between gap-4">
+      {/* Sideways: auto margins centre the content vertically, but (unlike
+          justify-center) never cut off the top when the panel has to scroll. */}
+      <div className="flex items-start justify-between gap-4 land:mt-auto">
         <div className="min-w-0">
           <span
             className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${TAG_STYLES[tag]}`}
@@ -88,18 +103,18 @@ export function SeatSheet({ seat, visible }: { seat: Seat; visible: boolean }) {
         <Metric label="From centre" value={formatOffset(offset)} />
       </dl>
 
-      <div className="mt-4 flex gap-3">
+      <div className="mt-4 flex gap-3 land:mb-auto">
         <button
           type="button"
           onClick={() => setView('map')}
-          className="rounded-full bg-white/[0.08] px-5 py-3 text-sm font-semibold ring-1 ring-white/10 hover:bg-white/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="rounded-full bg-white/[0.08] px-5 py-3 text-sm font-semibold whitespace-nowrap land:px-4 ring-1 ring-white/10 hover:bg-white/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           Change seat
         </button>
         <button
           type="button"
           onClick={() => setView('confirm')}
-          className="flex-1 rounded-full bg-mint px-5 py-3 text-sm font-semibold text-bg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+          className="flex-1 rounded-full bg-mint px-5 py-3 text-sm font-semibold whitespace-nowrap land:px-4 text-bg hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
         >
           Book <span aria-hidden>·</span> {price}
         </button>
@@ -110,9 +125,9 @@ export function SeatSheet({ seat, visible }: { seat: Seat; visible: boolean }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col-reverse rounded-2xl bg-white/[0.05] px-3 py-2.5 ring-1 ring-white/[0.06]">
+    <div className="flex flex-col-reverse justify-end rounded-2xl bg-white/[0.05] px-3 py-2.5 ring-1 ring-white/[0.06] land:px-2.5">
       <dt className="mt-0.5 text-[11px] text-white/55">{label}</dt>
-      <dd className="text-[15px] font-semibold tabular-nums">{value}</dd>
+      <dd className="text-[15px] font-semibold tabular-nums land:text-sm">{value}</dd>
     </div>
   )
 }

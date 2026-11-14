@@ -23,8 +23,13 @@ type StageState = {
   settled: boolean
   /** prefers-reduced-motion was on when the current transition started. */
   reduced: boolean
-  /** Height of the seat sheet in px, so the 3D view can keep the screen above it. */
-  sheetHeight: number
+  /**
+   * How much of the view the seat sheet covers, px: its height when it's a
+   * bottom sheet (portrait), its width when it's a side panel (phone sideways).
+   * The 3D camera frames the cinema screen in the space that's left.
+   */
+  sheetBottom: number
+  sheetRight: number
 }
 
 export const useStage = create<StageState>()(() => ({
@@ -33,5 +38,6 @@ export const useStage = create<StageState>()(() => ({
   arrived: false,
   settled: true,
   reduced: false,
-  sheetHeight: 300,
+  sheetBottom: 300,
+  sheetRight: 0,
 }))

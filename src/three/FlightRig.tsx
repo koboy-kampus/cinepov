@@ -37,7 +37,8 @@ export function FlightRig() {
   const width = useThree((state) => state.size.width)
   const height = useThree((state) => state.size.height)
   const view = useBooking((s) => s.view)
-  const sheetHeight = useStage((s) => s.sheetHeight)
+  const sheetBottom = useStage((s) => s.sheetBottom)
+  const sheetRight = useStage((s) => s.sheetRight)
   const arrived = useStage((s) => s.arrived)
   const lookAround = useLookAround(arrived)
 
@@ -49,12 +50,12 @@ export function FlightRig() {
   const signalledReady = useRef(false)
 
   // Line the top-down view up with the 2D map. Measured when a transition
-  // starts (view changes) and whenever the canvas is resized.
+  // starts (view changes) and whenever the layout changes (resize, rotation).
   useLayoutEffect(() => {
     const fit = measureMapFit(get().gl.domElement) ?? defaultMapFit(width, height)
     topDownPose(fit, from.current)
     invalidate()
-  }, [view, width, height, sheetHeight, get, invalidate])
+  }, [view, width, height, sheetBottom, sheetRight, get, invalidate])
 
   // Draw a frame whenever the timeline moves.
   useEffect(() => stageProgress.on('change', () => invalidate()), [invalidate])
@@ -67,7 +68,8 @@ export function FlightRig() {
     if (!seat) return
     lastSeat.current = seat
 
-    povPose(seat, { width, height, top: POV_TOP_INSET, bottom: sheetHeight }, to.current)
+    const framing = { width, height, top: POV_TOP_INSET, bottom: sheetBottom, right: sheetRight }
+    povPose(seat, framing, to.current)
     const u = flightTime(stageProgress.get(), useStage.getState().reduced)
     const pose = flightPose(u, from.current, to.current, now.current)
 
@@ -78,8 +80,8 @@ export function FlightRig() {
     camera.position.copy(pose.position)
     camera.quaternion.copy(yawTurn).multiply(pose.quaternion).multiply(pitchTurn)
     camera.fov = pose.fov
-    // Lens shift: moves the picture up without tilting the camera.
-    camera.setViewOffset(width, height, 0, pose.shift * height, width, height)
+    // Lens shift: moves the picture up / left without tilting the camera.
+    camera.setViewOffset(width, height, pose.shiftX * width, pose.shiftY * height, width, height)
     camera.updateProjectionMatrix()
 
     // Seen from high above, the fog would swallow everything: push it away.

@@ -35,7 +35,7 @@ export function PovOverlay() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="pointer-events-none absolute inset-x-0 top-5 z-20 mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white/90 ring-1 ring-white/15 backdrop-blur"
+            className="pointer-events-none absolute inset-x-0 top-5 z-20 land:right-[max(18.75rem,40%)] mx-auto w-fit rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white/90 ring-1 ring-white/15 backdrop-blur"
           >
             View from {seat.id}
           </motion.p>

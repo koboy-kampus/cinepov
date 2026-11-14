@@ -17,15 +17,20 @@ export type CameraPose = {
   quaternion: Quaternion
   /** Vertical field of view, degrees. */
   fov: number
-  /** Lens shift: how far the picture moves up, as a fraction of the view height. */
-  shift: number
+  /**
+   * Lens shift: how far the picture moves left (x, fraction of the view
+   * width) and up (y, fraction of the view height).
+   */
+  shiftX: number
+  shiftY: number
 }
 
 export const createPose = (): CameraPose => ({
   position: new Vector3(),
   quaternion: new Quaternion(),
   fov: 50,
-  shift: 0,
+  shiftX: 0,
+  shiftY: 0,
 })
 
 type Point = { x: number; y: number }
@@ -86,30 +91,48 @@ export function topDownPose(fit: MapFit, out = createPose()): CameraPose {
   const below = out.position.clone().setY(0)
   lookRotation(out.quaternion, out.position, below, NORTH)
   out.fov = TOP_DOWN_FOV
-  out.shift = 0
+  out.shiftX = 0
+  out.shiftY = 0
   return out
 }
 
-/** Space the POV must leave free, in px: a pill at the top and the sheet at the bottom. */
-export type Framing = { width: number; height: number; top: number; bottom: number }
+/**
+ * Space the POV must leave free, in px: a pill at the top, and the seat
+ * sheet at the bottom (portrait) or on the right (phone sideways).
+ */
+export type Framing = {
+  width: number
+  height: number
+  top: number
+  bottom: number
+  right?: number
+}
 
-/** Largest lens shift we allow (fraction of the view height). */
+/** Largest lens shift we allow (fraction of the view size). */
 const MAX_SHIFT = 0.3
 
 /**
- * The seated view: eye position, looking at the screen centre, same
- * horizontal FOV for every seat. The picture is shifted up (lens shift, so
- * verticals stay straight) so the screen sits in the middle of the area the
- * sheet doesn't cover.
+ * The seated view: eye position, looking at the screen centre. The picture
+ * is shifted (lens shift, so verticals stay straight) so the screen sits in
+ * the middle of the area the sheet doesn't cover, and every seat gets the
+ * same horizontal field of view across that free area.
  */
 export function povPose(seat: Seat, framing: Framing, out = createPose()): CameraPose {
+  const { width, height, top, bottom, right = 0 } = framing
   const eye = eyePosition(seat)
   out.position.set(eye.x, eye.y, eye.z)
   const target = new Vector3(SCREEN_CENTRE.x, SCREEN_CENTRE.y, SCREEN_CENTRE.z)
   lookRotation(out.quaternion, out.position, target, UP)
-  out.fov = verticalFov(POV_HORIZONTAL_FOV, framing.width / framing.height)
-  const freeMiddle = (framing.top + framing.height - framing.bottom) / 2
-  out.shift = MathUtils.clamp((framing.height / 2 - freeMiddle) / framing.height, 0, MAX_SHIFT)
+
+  // 70° across the free width, so the whole canvas is a bit wider than that.
+  const freeWidth = Math.max(width - right, width * 0.4)
+  const tanHalfWidth = Math.tan(MathUtils.degToRad(POV_HORIZONTAL_FOV / 2)) * (width / freeWidth)
+  out.fov = verticalFov(MathUtils.radToDeg(2 * Math.atan(tanHalfWidth)), width / height)
+
+  const freeMiddleX = (width - right) / 2
+  const freeMiddleY = (top + height - bottom) / 2
+  out.shiftX = MathUtils.clamp((width / 2 - freeMiddleX) / width, 0, MAX_SHIFT)
+  out.shiftY = MathUtils.clamp((height / 2 - freeMiddleY) / height, 0, MAX_SHIFT)
   return out
 }
 
@@ -155,6 +178,7 @@ export function flightPose(
   // Interpolate the lens in tan space, so the zoom speed feels even.
   const tan = MathUtils.lerp(tanHalf(from.fov), tanHalf(to.fov), move)
   out.fov = MathUtils.radToDeg(2 * Math.atan(tan))
-  out.shift = MathUtils.lerp(from.shift, to.shift, move)
+  out.shiftX = MathUtils.lerp(from.shiftX, to.shiftX, move)
+  out.shiftY = MathUtils.lerp(from.shiftY, to.shiftY, move)
   return out
 }

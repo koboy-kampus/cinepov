@@ -45,7 +45,7 @@ export function StageLoading() {
     <div
       role="status"
       // Appears only after a short delay, so fast loads never flash it.
-      className="pointer-events-none absolute inset-x-0 bottom-28 z-30 mx-auto flex w-fit animate-[stage-fade-in_200ms_150ms_both] flex-col items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-xs font-medium text-white/80 ring-1 ring-white/10 backdrop-blur"
+      className="pointer-events-none absolute inset-x-0 bottom-28 z-30 land:right-[max(18.75rem,40%)] mx-auto flex w-fit animate-[stage-fade-in_200ms_150ms_both] flex-col items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-xs font-medium text-white/80 ring-1 ring-white/10 backdrop-blur"
     >
       Loading 3D view…
       <span className="relative block h-0.5 w-24 overflow-hidden rounded-full bg-white/10">
