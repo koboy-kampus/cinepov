@@ -48,7 +48,12 @@ const SCENES = [
     query: '?seat=F8',
     steps: async (page) => {
       await page.getByText('View from F8').waitFor({ timeout: 30000 })
-      await page.evaluate(() => window.__cinepov.stageProgress.jump(0.5))
+      await page.evaluate(() => {
+        // As in a real flight: not arrived yet, so no pill and no sheet.
+        window.__cinepov.useStage.setState({ arrived: false, settled: false })
+        window.__cinepov.stageProgress.jump(0.5)
+      })
+      await page.waitForTimeout(600) // let the sheet slide away
       await page.waitForTimeout(500)
     },
   },
